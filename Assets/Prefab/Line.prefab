@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7040305491935813978}
   m_Layer: 0
   m_Name: Line
-  m_TagString: Untagged
+  m_TagString: line
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -165,6 +165,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 092ac6238ef12874b865279b1a75cfe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lmColl:
+    serializedVersion: 2
+    m_Bits: 4294967295
   resetBaseList: 0
   lineRenderer: {fileID: 0}
   edgeCollider: {fileID: 0}
@@ -172,3 +175,5 @@ MonoBehaviour:
   baseList: []
   edgeCollisionList: []
   betweenList: []
+  point1: {x: 0, y: 0}
+  point2: {x: 0, y: 0}
