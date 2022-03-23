@@ -31,6 +31,10 @@ public class DrawLine : MonoBehaviour
 
 
     }
+    public void OnClickRemove()
+    {
+        line.CheckToRemovePoint();
+    }
 
 
 }

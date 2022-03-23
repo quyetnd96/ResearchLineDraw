@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class LineController : MonoBehaviour
 
 {
+    public bool removePoint;
     public LayerMask lmColl;
-    private RaycastHit2D _hitWallDestroy;
-    private RaycastHit2D _hitWallCreate;
+    private RaycastHit2D[] _hitWallDestroy;
+    private RaycastHit2D[] _hitWallCreate;
     public bool resetBaseList = false;
     public LineRenderer lineRenderer;
     public EdgeCollider2D edgeCollider;
@@ -82,58 +84,101 @@ public class LineController : MonoBehaviour
 
     void Update()
     {
+
         UpdateEdgeCollisionList();
-        if (_hitWallCreate.collider == null || _hitWallCreate.collider.CompareTag("line"))
-        {
-            return;
-        }
-        else
-        {
-            Debug.Log(_hitWallCreate.collider);
-        }
+        removePointBetweenList();
 
     }
     public void MoveTo(Vector3 from, Vector3 target)
     {
+        var x = target;
         resetBaseList = true;
         if (!isInitialized) return;
         lineRenderer.SetPosition(lineRenderer.positionCount - 1, target);
         UpdateBaseList(from, target);
         UpdateLineRenderer();
+        // CheckToRemovePoint();
+
+
+
+
     }
     private void OnCollisionEnter2D(Collision2D other)
     {
 
         if (other.gameObject.CompareTag("wall")) return;
-        if (_hitWallCreate.collider == null)
+        if (_hitWallCreate == null)
         {
             return;
         }
         else
         {
-
-
-            Debug.Log(_hitWallCreate.collider.gameObject);
-
+            foreach (RaycastHit2D x in _hitWallCreate)
+            {
+                if (x.collider.CompareTag("wall"))
+                {
+                    return;
+                }
+            }
 
             Vector2 newFingerPos = new Vector2(other.transform.position.x, other.transform.position.y);
+
             betweenList.Add(newFingerPos);
 
             lineRenderer.positionCount++;
         }
 
 
+
     }
+    public void CheckToRemovePoint()
+    {
+        removePoint = false;
+        if (_hitWallDestroy != null)
+        {
+            foreach (RaycastHit2D x in _hitWallDestroy)
+            {
+                if (x.collider.CompareTag("wall"))
+                {
+                    removePoint = false;
+                }
+                else
+                {
+                    removePoint = true;
+                }
+            }
+        }
+
+
+    }
+
+    public void removePointBetweenList()
+    {
+
+
+        if (removePoint == true && betweenList.Count >= 1)
+        {
+
+            Debug.Log(1);
+            lineRenderer.positionCount--;
+            betweenList.RemoveRange(betweenList.Count - 1, 1);
+            CheckToRemovePoint();
+        }
+
+
+    }
+
     public void CreateLinecastDestroy()
     {
-        if (baseList.Count >= 3)
+        if (betweenList.Count >= 1)
         {
 
 
             point1 = baseList[baseList.Count - 3];
             point2 = baseList[baseList.Count - 1];
 
-            _hitWallDestroy = Physics2D.Linecast(point1, point2, lmColl);
+            _hitWallDestroy = Physics2D.LinecastAll(point1, point2, lmColl);
+
 
 #if UNITY_EDITOR
             Debug.DrawLine(point1, point2, Color.red);
@@ -144,17 +189,16 @@ public class LineController : MonoBehaviour
 
     public void CreateLinecastCreate()
     {
+        if (baseList.Count >= 2)
+        {
+            point1 = baseList[baseList.Count - 2];
+            point2 = baseList[baseList.Count - 1];
 
-
-
-        point1 = baseList[baseList.Count - 2];
-        point2 = baseList[baseList.Count - 1];
-
-        _hitWallCreate = Physics2D.Linecast(point1, point2, lmColl);
+            _hitWallCreate = Physics2D.LinecastAll(point1, point2, lmColl);
 #if UNITY_EDITOR
-        Debug.DrawLine(point1, point2, Color.yellow);
+            Debug.DrawLine(point1, point2, Color.yellow);
 #endif
-
+        }
 
     }
 
